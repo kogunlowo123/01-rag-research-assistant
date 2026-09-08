@@ -1,0 +1,60 @@
+# gitleaks configuration.
+#
+# The default rule set is used in full; this file only records allowlist
+# entries, each with a justification. An allowlist entry without a reason is a
+# suppressed finding, which is indistinguishable from an unnoticed one.
+
+[extend]
+useDefault = true
+
+[[rules]]
+# The default `curl-auth-header` rule fires on any curl invocation carrying an
+# auth header, regardless of whether the value is a real credential. Every
+# occurrence in this repository is a documentation example whose value is an
+# obvious placeholder or a shell variable.
+id = "curl-auth-header"
+description = "Curl command carrying an authorisation header"
+regex = '''\bcurl\b(?:.*?\s)(?:-H|--header)\s+['"]?(?:Authorization|X-API-Key):\s*(?:Bearer\s+)?([A-Za-z0-9_\-\.=]{16,})['"]?'''
+secretGroup = 1
+keywords = ["curl"]
+
+[rules.allowlist]
+regexTarget = "match"
+regexes = [
+  # Shell variable references: the value is never in the repository.
+  '''\$\{?[A-Z_]+\}?''',
+  # Placeholders and development-only values used in documentation, the smoke
+  # test and the compose stack. All are inert by construction.
+  '''REPLACE_ME''',
+  '''local-development-key''',
+  '''smoke-test-key-not-a-real-secret''',
+  '''acme-test-key-not-a-real-secret''',
+  '''(?i)your[-_]?(api[-_]?)?key''',
+]
+
+[allowlist]
+description = "Repository-wide allowlist"
+
+paths = [
+  # Regression fixtures deliberately contain credential-shaped strings so the
+  # redaction and detection controls have something real to act on.
+  '''tests/security/test_boundaries\.py''',
+  '''tests/unit/test_security_.*\.py''',
+]
+
+regexes = [
+  # Documented placeholders in .env.example and the configuration reference.
+  '''REPLACE_ME[A-Z_]*''',
+  # Compose-only credentials for a database that exists solely on a developer
+  # machine and is never reachable from outside it.
+  '''rag-local-password''',
+  '''local-development-key''',
+  # Test and smoke-test keys, named so their nature is unmistakable.
+  '''[a-z-]*-key-not-a-real-secret''',
+  # Example credential shapes quoted in security documentation and in the
+  # redaction test suite, so that the controls can be described and asserted.
+  '''AKIAIOSFODNN7EXAMPLE''',
+  '''sk-abcdefghijklmnopqrstuvwxyz0123''',
+  '''ghp_abcdefghijklmnopqrstuvwxyz012345''',
+  '''eyJhbGciOiJIUzI1NiJ9\.eyJzdWIiOiIxIn0\.abcdefghijkl''',
+]

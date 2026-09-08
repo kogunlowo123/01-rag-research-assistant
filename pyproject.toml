@@ -39,7 +39,13 @@ dependencies = [
 
 [project.optional-dependencies]
 # Local ONNX embedding models. CPU only, no torch, no API credentials.
-local-embeddings = ["fastembed>=0.7,<0.8"]
+local-embeddings = [
+  "fastembed>=0.8,<0.9",
+  # fastembed pulls Pillow for its image-embedding path, which this project
+  # never uses. Pinned to a fixed version anyway: an unreachable
+  # vulnerability is still a vulnerability in the shipped dependency tree.
+  "pillow>=12.3.0,<13",
+]
 # PostgreSQL backend for the relational metadata store.
 postgres = ["psycopg[binary]>=3.2,<4"]
 

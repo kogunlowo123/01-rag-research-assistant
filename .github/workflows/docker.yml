@@ -52,4 +52,4 @@ jobs:
           test "${uid}" != "0"
 
       - name: Smoke test
-        run: ./scripts/smoke-test.sh ${{ github.event.repository.name }}:ci
+        run: bash scripts/smoke-test.sh ${{ github.event.repository.name }}:ci
