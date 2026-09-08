@@ -62,10 +62,10 @@ dev = [
   "pytest>=9.0.3,<10",
   "pytest-asyncio>=1.3,<2",
   "pytest-cov>=7.0,<8",
-  "ruff>=0.15,<0.16",
+  "ruff>=0.16.6,<0.17",
   "mypy>=1.19,<2",
   "bandit>=1.9,<2",
-  "respx>=0.22,<0.23",
+  "respx>=0.23.1,<0.24",
   "httpx>=0.28,<0.29",
   "asgi-lifespan>=2.1,<3",
 ]
@@ -151,6 +151,10 @@ ignore = [
 "examples/**" = ["T20", "D401"]
 "src/rag_assistant/cli.py" = ["T20"]
 "tasks.py" = ["D", "T20", "ANN"]
+# A FastAPI route signature is a declaration of the request surface, not a
+# call site: each parameter is bound by name from the path, query, body or
+# dependency graph, and nothing ever calls these functions positionally.
+"src/rag_assistant/api/routes/**" = ["PLR0917"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["rag_assistant"]
