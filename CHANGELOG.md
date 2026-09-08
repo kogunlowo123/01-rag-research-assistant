@@ -84,5 +84,5 @@ when the answer cannot be traced to evidence.
 - Every threat in [THREAT-MODEL.md](THREAT-MODEL.md) with a mechanical control
   has a regression test that fails if the control is removed.
 
-[Unreleased]: https://github.com/kogunlowo123/01-rag-research-assistant/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/kogunlowo123/01-rag-research-assistant/releases/tag/v0.1.0
+[Unreleased]: https://github.com/kogunlowo123/rag-research-assistant/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/kogunlowo123/rag-research-assistant/releases/tag/v0.1.0

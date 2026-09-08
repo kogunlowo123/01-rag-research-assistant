@@ -6,7 +6,7 @@
 
 Report it privately through GitHub Security Advisories:
 
-1. Go to the [Security tab](https://github.com/kogunlowo123/01-rag-research-assistant/security/advisories)
+1. Go to the [Security tab](https://github.com/kogunlowo123/rag-research-assistant/security/advisories)
 2. Select **Report a vulnerability**
 
 Please include: what the issue is, how to reproduce it, the impact you believe it

@@ -73,5 +73,5 @@ CMD ["rag_assistant"]
 
 LABEL org.opencontainers.image.title="rag-research-assistant" \
       org.opencontainers.image.description="Grounded retrieval-augmented generation service with citation verification and prompt-injection defence" \
-      org.opencontainers.image.source="https://github.com/kogunlowo123/01-rag-research-assistant" \
+      org.opencontainers.image.source="https://github.com/kogunlowo123/rag-research-assistant" \
       org.opencontainers.image.licenses="MIT"
