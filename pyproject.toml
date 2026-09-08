@@ -21,7 +21,7 @@ dependencies = [
   # starlette 0.x are fixed only in the 1.x line, and FastAPI's own floor is
   # lower than the fixed version.
   "starlette>=1.3.1,<2",
-  "uvicorn[standard]>=0.40,<0.41",
+  "uvicorn[standard]>=0.40,<0.53",
   "pydantic>=2.12,<3",
   "pydantic-settings>=2.13,<3",
   "sqlalchemy>=2.0.44,<2.1",
