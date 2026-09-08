@@ -100,7 +100,7 @@ jobs:
           # --no-deps audits the locked set exactly as resolved. Any ignored
           # identifier must have a dated justification in
           # security/audit-exceptions.md; see CONTRIBUTING.md.
-          uvx pip-audit --strict --no-deps \n            --requirement requirements.audit.txt "${ARGS[@]}"
+          uvx pip-audit --strict --no-deps --requirement requirements.audit.txt "${ARGS[@]}"
 
   codeql:
     name: CodeQL
