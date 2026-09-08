@@ -1,0 +1,8 @@
+# Vulnerability identifiers pip-audit is permitted to ignore, one per line.
+#
+# An entry here MUST have a matching, dated justification in
+# security/audit-exceptions.md. Adding an identifier without one is a review
+# failure: an unexplained suppression is indistinguishable from an unnoticed
+# vulnerability.
+#
+# This file is currently empty: every dependency in uv.lock resolves clean.

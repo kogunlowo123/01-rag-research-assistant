@@ -1,0 +1,55 @@
+name: Container
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: container-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    name: Build, scan and smoke test image
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ${{ github.event.repository.name }}:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: image
+          image-ref: ${{ github.event.repository.name }}:ci
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Assert image runs as non-root
+        run: |
+          set -euo pipefail
+          uid="$(docker run --rm --entrypoint id ${{ github.event.repository.name }}:ci -u)"
+          echo "container uid=${uid}"
+          test "${uid}" != "0"
+
+      - name: Smoke test
+        run: ./scripts/smoke-test.sh ${{ github.event.repository.name }}:ci

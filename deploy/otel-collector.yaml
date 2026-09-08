@@ -1,0 +1,31 @@
+# Minimal collector for local development: accept OTLP over HTTP, batch, and
+# print to the collector log. Replace the debug exporter with your backend
+# (Tempo, Jaeger, Honeycomb, Datadog) in a real deployment.
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 5s
+  # Defence in depth: the application already redacts, but a collector shared
+  # between services should not forward attributes that may carry credentials.
+  attributes/redact:
+    actions:
+      - key: http.request.header.authorization
+        action: delete
+      - key: http.request.header.x-api-key
+        action: delete
+
+exporters:
+  debug:
+    verbosity: normal
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [attributes/redact, batch]
+      exporters: [debug]

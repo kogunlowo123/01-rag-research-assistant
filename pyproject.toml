@@ -1,0 +1,214 @@
+[project]
+name = "rag-research-assistant"
+version = "0.1.0"
+description = "Production-grade retrieval-augmented generation research assistant with hybrid retrieval, grounded citations and defence against prompt injection in retrieved content."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "MIT" }
+authors = [{ name = "Kehinde Ogunlowo" }]
+keywords = ["rag", "retrieval-augmented-generation", "llm", "prompt-injection", "fastapi"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+  "fastapi>=0.141.1,<0.142",
+  # Pinned directly rather than left to FastAPI: several advisories against
+  # starlette 0.x are fixed only in the 1.x line, and FastAPI's own floor is
+  # lower than the fixed version.
+  "starlette>=1.3.1,<2",
+  "uvicorn[standard]>=0.40,<0.41",
+  "pydantic>=2.12,<3",
+  "pydantic-settings>=2.13,<3",
+  "sqlalchemy>=2.0.44,<2.1",
+  "aiosqlite>=0.21,<0.22",
+  "numpy>=2.3,<3",
+  "structlog>=25.5,<26",
+  "httpx>=0.28,<0.29",
+  "pypdf>=6.1,<7",
+  "python-multipart>=0.0.20,<0.1",
+  "opentelemetry-api>=1.39,<2",
+  "opentelemetry-sdk>=1.39,<2",
+  "opentelemetry-instrumentation-fastapi>=0.60b0",
+  "opentelemetry-exporter-otlp-proto-http>=1.39,<2",
+]
+
+[project.optional-dependencies]
+# Local ONNX embedding models. CPU only, no torch, no API credentials.
+local-embeddings = ["fastembed>=0.7,<0.8"]
+# PostgreSQL backend for the relational metadata store.
+postgres = ["psycopg[binary]>=3.2,<4"]
+
+[project.scripts]
+rag-assistant = "rag_assistant.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/kogunlowo123/01-rag-research-assistant"
+Source = "https://github.com/kogunlowo123/01-rag-research-assistant"
+Issues = "https://github.com/kogunlowo123/01-rag-research-assistant/issues"
+
+[dependency-groups]
+dev = [
+  "pytest>=9.0.3,<10",
+  "pytest-asyncio>=1.3,<2",
+  "pytest-cov>=7.0,<8",
+  "ruff>=0.15,<0.16",
+  "mypy>=1.19,<2",
+  "bandit>=1.9,<2",
+  "respx>=0.22,<0.23",
+  "httpx>=0.28,<0.29",
+  "asgi-lifespan>=2.1,<3",
+]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rag_assistant"]
+
+# --------------------------------------------------------------------------
+# Lint and format
+# --------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "E", "W",    # pycodestyle
+  "F",         # pyflakes
+  "I",         # isort
+  "N",         # pep8-naming
+  "UP",        # pyupgrade
+  "B",         # bugbear
+  "A",         # builtins shadowing
+  "C4",        # comprehensions
+  "DTZ",       # naive datetimes
+  "T20",       # print statements
+  "PT",        # pytest style
+  "RET",       # return simplification
+  "SIM",       # simplify
+  "TID",       # tidy imports
+  "PTH",       # pathlib
+  "ERA",       # commented-out code
+  "PL",        # pylint subset
+  "TRY",       # exception anti-patterns
+  "RUF",       # ruff-specific
+  "S",         # bandit-equivalent rules
+  "ASYNC",     # async correctness
+  "ANN",       # missing annotations
+  "D",         # docstrings
+]
+ignore = [
+  "D203",    # incompatible with D211
+  "D213",    # incompatible with D212
+  "ANN401",  # explicit Any is occasionally the correct type for provider payloads
+  "TRY003",  # long messages inside raise are clearer than an exception subclass per message
+  "PLR0913", # constructor injection legitimately takes several collaborators
+  # Prose in docstrings and comments uses en/em dashes and curly quotes. These
+  # rules exist to catch homoglyph confusion in identifiers, not typography in
+  # documentation; the security-relevant case is handled explicitly by
+  # rag_assistant.security.normalization and tested there.
+  "RUF001",
+  "RUF002",
+  "RUF003",
+  # Several imports are deliberately deferred: optional extras (fastembed),
+  # heavyweight SDK submodules (OTLP exporters) and instrumentation that must
+  # not be imported when tracing is disabled. Each site carries a comment.
+  "PLC0415",
+  # This project runs on asyncio, not trio. The rule's suggested replacements
+  # (trio.Path, anyio.path) are not dependencies here, and the flagged calls are
+  # startup or batch-time filesystem checks, not per-request work.
+  "ASYNC240",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Test modules: assertions are the point (S101); fixture docstrings read as noun
+# phrases (D401); class-level table fixtures are never mutated (RUF012); string
+# literals naming addresses or attack payloads are data, not configuration
+# (S104, S105, S106); and the security suite deliberately contains adversarial
+# text (PLE2502 is handled by explicit escapes where it matters).
+"tests/**" = [
+  "S101", "S104", "S105", "S106",
+  "D100", "D101", "D102", "D103", "D104", "D401",
+  "PLR2004", "ANN201", "ANN001", "RUF012",
+]
+"src/rag_assistant/evaluation/**" = ["T20"]
+# Examples are scripts: printing is their entire output, and their helper
+# docstrings read as noun phrases describing what is returned.
+"examples/**" = ["T20", "D401"]
+"src/rag_assistant/cli.py" = ["T20"]
+"tasks.py" = ["D", "T20", "ANN"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["rag_assistant"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "parents"
+
+# --------------------------------------------------------------------------
+# Types
+# --------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.12"
+files = ["src", "tests", "tasks.py"]
+strict = true
+warn_unreachable = true
+disallow_any_generics = true
+show_error_codes = true
+pretty = true
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["fastembed.*", "pypdf.*", "opentelemetry.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_untyped_decorators = false
+
+# --------------------------------------------------------------------------
+# Tests
+# --------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+  "unit: pure logic, no I/O and no network",
+  "integration: component wiring against real local storage and an in-process HTTP client",
+  "security: adversarial cases; a failure is a security regression",
+  "e2e: full path through the running application",
+]
+filterwarnings = ["error", "ignore::DeprecationWarning:httpx.*"]
+
+[tool.coverage.run]
+source = ["src/rag_assistant"]
+branch = true
+omit = ["src/rag_assistant/__main__.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_also = [
+  'if TYPE_CHECKING:',
+  'raise NotImplementedError',
+  '@(abc\.)?abstractmethod',
+  'class .*\(Protocol\):',
+  '^\s*\.\.\.$',
+]
+
+# --------------------------------------------------------------------------
+# Security static analysis
+# --------------------------------------------------------------------------
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "build", "dist"]

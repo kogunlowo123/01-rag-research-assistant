@@ -1,0 +1,91 @@
+# Local stack: the service, PostgreSQL, Ollama and an OpenTelemetry collector.
+#
+# This is the "everything on" configuration used to exercise the production
+# code paths locally. The service alone needs none of it: `docker run` with the
+# defaults uses SQLite and the extractive backend.
+#
+#   docker compose up --build            # service + database
+#   docker compose --profile models up   # ... and a local model server
+#   docker compose --profile otel up     # ... and trace collection
+
+name: rag-research-assistant
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      RAG_ENVIRONMENT: staging
+      RAG_STORAGE__DATABASE_URL: postgresql+psycopg://rag:rag-local-password@postgres:5432/rag
+      # Development-only value. Production keys come from a secret manager and
+      # are never written into a compose file or an image.
+      RAG_SECURITY__API_KEYS: acme:local-development-key
+      RAG_SECURITY__REQUIRE_API_KEY: "true"
+      RAG_OBSERVABILITY__LOG_FORMAT: json
+      RAG_OBSERVABILITY__LOG_LEVEL: INFO
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      - api-state:/app/var
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: rag
+      POSTGRES_PASSWORD: rag-local-password
+      POSTGRES_DB: rag
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rag -d rag"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Local model server. Pull a model once with:
+  #   docker compose exec ollama ollama pull llama3.2:3b
+  # then set RAG_CHAT__BACKEND=ollama and RAG_PROVIDERS__OLLAMA_BASE_URL.
+  ollama:
+    image: ollama/ollama:latest
+    profiles: ["models"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    restart: unless-stopped
+
+  # Trace collection. Set RAG_OBSERVABILITY__TRACING_ENABLED=true and
+  # RAG_OBSERVABILITY__OTLP_ENDPOINT=http://otel-collector:4318/v1/traces
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    profiles: ["otel"]
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./deploy/otel-collector.yaml:/etc/otel/config.yaml:ro
+    ports:
+      - "4318:4318"
+    restart: unless-stopped
+
+volumes:
+  api-state:
+  postgres-data:
+  ollama-models:
