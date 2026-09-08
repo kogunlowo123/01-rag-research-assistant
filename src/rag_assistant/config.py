@@ -103,9 +103,7 @@ class IngestionSettings(BaseModel):
         default=False,
         description="Fetching documents by URL is opt-in because it is an SSRF surface.",
     )
-    url_allowed_schemes: Annotated[frozenset[str], NoDecode] = Field(
-        default=frozenset({"https"})
-    )
+    url_allowed_schemes: Annotated[frozenset[str], NoDecode] = Field(default=frozenset({"https"}))
     url_allowed_hosts: Annotated[frozenset[str], NoDecode] = Field(
         default=frozenset(),
         description=("Exact hostnames the fetcher may contact. An empty set refuses every fetch."),

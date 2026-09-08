@@ -33,8 +33,9 @@ htmlcov/
 !**/testdata/**/*.key
 secrets/
 
-# Local state
-data/
+# Local runtime state. Note that data/regression is NOT ignored: the
+# evaluation dataset and its corpus are part of the repository, and an
+# over-broad 'data/' rule silently excluded them once already.
 var/
 *.db
 *.sqlite
