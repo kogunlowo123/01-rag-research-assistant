@@ -40,7 +40,7 @@ def _uv_run(*args: str) -> list[str]:
 TASKS: dict[str, Task] = {
     "setup": (
         "Create the virtual environment and install all dependency groups.",
-        [_uv("sync", "--all-extras", "--dev")],
+        [_uv("sync", "--all-extras", "--dev", "--group", "docs")],
     ),
     "lock": (
         "Refresh uv.lock from pyproject.toml.",
@@ -99,6 +99,10 @@ TASKS: dict[str, Task] = {
         ],
     ),
     "build": ("Build the wheel and sdist.", [_uv("build")]),
+    "site": (
+        "Build the documentation site into _site/ and check its internal links.",
+        [_uv_run("--group", "docs", "python", "scripts/build_site.py", "--output", "_site")],
+    ),
     "docker-build": (
         "Build the container image.",
         [["docker", "build", "-t", f"{IMAGE}:local", "."]],
@@ -127,6 +131,7 @@ CLEAN_PATHS = (
     ".coverage",
     "coverage.xml",
     "requirements.audit.txt",
+    "_site",
 )
 
 

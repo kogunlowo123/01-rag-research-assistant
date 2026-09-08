@@ -5,10 +5,13 @@
 [![Container](https://github.com/kogunlowo123/rag-research-assistant/actions/workflows/docker.yml/badge.svg)](https://github.com/kogunlowo123/rag-research-assistant/actions/workflows/docker.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Documentation](https://github.com/kogunlowo123/rag-research-assistant/actions/workflows/pages.yml/badge.svg)](https://kogunlowo123.github.io/rag-research-assistant/)
 
 A retrieval-augmented generation service that answers questions from an ingested
 document corpus, cites the passages that support each claim, measures how well
 the answer is actually grounded in those passages, and refuses when it is not.
+
+**Documentation:** <https://kogunlowo123.github.io/rag-research-assistant/>
 
 ---
 

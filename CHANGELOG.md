@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+- Documentation site generated from the repository Markdown and published to
+  GitHub Pages, with a build that fails on a broken internal link
+- `site` task in `tasks.py` and `Makefile` to build the site locally
+
+### Changed
+- Repository renamed to `rag-research-assistant`; badge, container-label and
+  project-metadata URLs updated to the canonical name
 
 ## [0.1.0] - 2026-09-07
 
